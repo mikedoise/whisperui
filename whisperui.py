@@ -40,6 +40,16 @@ class TranscriptionFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_open, open_item)
         self.Bind(wx.EVT_MENU, self.on_save, save_item)
 
+         # Create the toolbar
+        self.toolbar = self.CreateToolBar()
+        self.choice = wx.Choice(self.toolbar, choices=["base", "small", "large"])
+        self.choice.SetSize((120, -1))
+        self.toolbar.AddControl(self.choice)
+        open_tool = self.toolbar.AddTool(wx.ID_OPEN, "Open", wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN))
+        save_tool = self.toolbar.AddTool(wx.ID_SAVE, "Save", wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE))
+        self.toolbar.Realize()
+
+        
         # Create the TranscriptionPanel
         self.panel = TranscriptionPanel(self)
 
