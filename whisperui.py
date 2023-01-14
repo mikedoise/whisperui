@@ -6,23 +6,17 @@ class TranscriptionPanel(wx.Panel):
         super().__init__(parent)
 
         # Create a choice control to select the model
-        self.transcription_model = wx.Choice(self, choices=["base", "small", "large"])
         
         # Create a text control to display the transcription
         self.transcription_text = wx.TextCtrl(self, value="", style=wx.TE_MULTILINE)
 
         # Create buttons to save the transcription and play/pause the audio
-        self.save_button = wx.Button(self, label="Save Transcription")
-        self.open_button = wx.Button(self, label="Open File")
         self.play_pause_button = wx.Button(self, label="Play")
 
         # Add the controls to a sizer
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.transcription_model, 0, wx.CENTER)
         sizer.Add(self.transcription_text, 1, wx.EXPAND)
-        sizer.Add(self.save_button, 0, wx.ALIGN_CENTER)
         sizer.Add(self.play_pause_button, 0, wx.ALIGN_CENTER)
-        sizer.Add(self.open_button, 0, wx.ALIGN_CENTER)
         self.SetSizer(sizer)
 
 class TranscriptionFrame(wx.Frame):
@@ -42,12 +36,15 @@ class TranscriptionFrame(wx.Frame):
 
          # Create the toolbar
         self.toolbar = self.CreateToolBar()
-        self.choice = wx.Choice(self.toolbar, choices=["base", "small", "large"])
-        self.choice.SetSize((120, -1))
-        self.toolbar.AddControl(self.choice)
-        open_tool = self.toolbar.AddTool(wx.ID_OPEN, "Open", wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN))
-        save_tool = self.toolbar.AddTool(wx.ID_SAVE, "Save", wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE))
+        self.transcription_model = wx.Choice(self.toolbar, choices=["base", "small", "large"])
+        self.transcription_model.SetSize((120, -1))
+        self.toolbar.AddControl(self.transcription_model)
+        self.open_tool = self.toolbar.AddTool(wx.ID_OPEN, "Open", wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN))
+        self.save_tool = self.toolbar.AddTool(wx.ID_SAVE, "Save", wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE))
         self.toolbar.Realize()
+
+        self.Bind(wx.EVT_TOOL, self.on_open, self.open_tool)
+        self.Bind(wx.EVT_TOOL, self.on_save, self.save_tool)
 
         
         # Create the TranscriptionPanel
@@ -55,11 +52,6 @@ class TranscriptionFrame(wx.Frame):
 
         # Bind the play/pause button's click event to a handler function
         self.panel.play_pause_button.Bind(wx.EVT_BUTTON, self.on_play_pause)
-
-        # Bind the save button's click event to a handler function
-        self.panel.save_button.Bind(wx.EVT_BUTTON, self.on_save)
-
-        self.panel.open_button.Bind(wx.EVT_BUTTON, self.on_open)
 
         # Set up the frame
         self.SetTitle("Transcription")
@@ -96,7 +88,7 @@ class TranscriptionFrame(wx.Frame):
 
             # Transcribe the chosen file
             filepath = file_dialog.GetPath()
-            model = whisper.load_model(self.panel.transcription_model.GetStringSelection())
+            model = whisper.load_model(self.transcription_model.GetStringSelection())
             result = model.transcribe(filepath)
             transcription = result["text"]
             self.panel.transcription_text.SetValue(transcription)
