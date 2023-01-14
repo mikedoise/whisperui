@@ -29,10 +29,20 @@ class TranscriptionFrame(wx.Frame):
         save_item = file_menu.Append(wx.ID_SAVE, "Save Transcription")
         file_menu.Append(wx.ID_EXIT, "Exit")
         menu_bar.Append(file_menu, "File")
+        model_menu = wx.Menu()
+        base_item = model_menu.Append(wx.ID_ANY, "Base")
+        small_item = model_menu.Append(wx.ID_ANY, "Small")
+        large_item = model_menu.Append(wx.ID_ANY, "Large")
+        menu_bar.Append(model_menu, "Model")
         self.SetMenuBar(menu_bar)
 
         self.Bind(wx.EVT_MENU, self.on_open, open_item)
         self.Bind(wx.EVT_MENU, self.on_save, save_item)
+        self.Bind(wx.EVT_MENU, self.on_exit, id=wx.ID_EXIT)
+
+        self.Bind(wx.EVT_MENU, self.on_base, base_item)
+        self.Bind(wx.EVT_MENU, self.on_small, small_item)
+        self.Bind(wx.EVT_MENU, self.on_large, large_item)
 
          # Create the toolbar
         self.toolbar = self.CreateToolBar()
@@ -58,6 +68,19 @@ class TranscriptionFrame(wx.Frame):
         self.SetSize(800, 600)
         self.Centre()
         self.Show()
+
+    def on_exit(self, event):
+        self.Close()
+    
+    def on_base(self, event):
+        self.transcription_model.SetStringSelection("base")
+
+    def on_small(self, event):
+        self.transcription_model.SetStringSelection("small")
+
+    def on_large(self, event):
+        self.transcription_model.SetStringSelection("large")
+
 
     def on_play_pause(self, event):
         # Update the button label and start or pause the audio
