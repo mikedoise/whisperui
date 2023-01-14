@@ -31,12 +31,14 @@ class TranscriptionFrame(wx.Frame):
 
         menu_bar = wx.MenuBar()
         file_menu = wx.Menu()
-        file_menu.Append(wx.ID_OPEN, "Open Audio File")
-        file_menu.Append(wx.ID_SAVE, "Save Transcription")
+        open_item = file_menu.Append(wx.ID_OPEN, "Open Audio File")
+        save_item = file_menu.Append(wx.ID_SAVE, "Save Transcription")
         file_menu.Append(wx.ID_EXIT, "Exit")
         menu_bar.Append(file_menu, "File")
         self.SetMenuBar(menu_bar)
 
+        self.Bind(wx.EVT_MENU, self.on_open, open_item)
+        self.Bind(wx.EVT_MENU, self.on_save, save_item)
 
         # Create the TranscriptionPanel
         self.panel = TranscriptionPanel(self)
