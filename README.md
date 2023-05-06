@@ -12,4 +12,5 @@ Complete the following steps to use Whisper UI
 1. Install Python3
 2. Install PySide6 pip install pyside6
 3. Install OpenAI Whisper pip install openai-whisper
-3. Run the script: python3 whisperui-pyside6.py
+4. Install PyWhisper for Windows pip install pywhisper
+5. Run the script: python3 whisperui-pyside6.py

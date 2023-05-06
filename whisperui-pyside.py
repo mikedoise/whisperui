@@ -1,6 +1,9 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QMenu, QMenuBar, QToolBar, QComboBox, QTextEdit, QVBoxLayout, QWidget, QPushButton, QFileDialog
 from PySide6.QtGui import QAction, Qt
 import whisper
+import platform
+if platform.system() == "Windows": 
+    import pywhisper
 
 class TranscriptionPanel(QWidget):
     def __init__(self, parent=None):
@@ -93,10 +96,19 @@ class TranscriptionFrame(QMainWindow):
         file_dialog.setAcceptMode(QFileDialog.AcceptOpen)
         if file_dialog.exec() == QFileDialog.Accepted:
             file_path = file_dialog.selectedFiles()[0]
-            model = whisper.load_model(self.transcription_model.currentText())
-            result = model.transcribe(file_path)
-            transcription = result["text"]
-            self.panel.transcription_text.setPlainText(transcription)
+            if platform.system() == "Windows":
+                file_path = file_path.replace("/", "\\")
+            print(file_path)
+            if platform.system() == "Windows":
+                model = pywhisper.load_model(self.transcription_model.currentText())
+                result = model.transcribe(file_path)
+                transcription = result["text"]
+                self.panel.transcription_text.setPlainText(transcription)
+            else:
+                model = whisper.load_model(self.transcription_model.currentText())
+                result = model.transcribe(file_path)
+                transcription = result["text"]
+                self.panel.transcription_text.setPlainText(transcription)
 
 if __name__ == '__main__':
     app = QApplication()
