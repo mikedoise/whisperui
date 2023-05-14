@@ -98,17 +98,29 @@ class TranscriptionFrame(QMainWindow):
             file_path = file_dialog.selectedFiles()[0]
             if platform.system() == "Windows":
                 file_path = file_path.replace("/", "\\")
-            print(file_path)
-            if platform.system() == "Windows":
+                print(file_path)
                 model = pywhisper.load_model(self.transcription_model.currentText())
-                result = model.transcribe(file_path)
-                transcription = result["text"]
-                self.panel.transcription_text.setPlainText(transcription)
+                result = model.transcribe(file_path, "json")
+                theText = []
+                for word in result["segments"]:
+                    print(f"{word['text']} ({word['start']}-{word['end']})")
+                    theText.append(str(round(word["start"], 2)) + " - " + word["text"])
+                allText = ""
+                for item in theText: 
+                    allText += item + "\n"
+                self.panel.transcription_text.setPlainText(allText)
             else:
+                # transcribe the audio file with timestamps
                 model = whisper.load_model(self.transcription_model.currentText())
-                result = model.transcribe(file_path)
-                transcription = result["text"]
-                self.panel.transcription_text.setPlainText(transcription)
+                result = model.transcribe(file_path, verbose=True)
+                theText = []
+                for word in result["segments"]:
+                    print(f"{word['text']} ({word['start']}-{word['end']})")
+                    theText.append(str(round(word["start"], 2)) + " - " + word["text"])
+                allText = ""
+                for item in theText: 
+                    allText += item + "\n"
+                self.panel.transcription_text.setPlainText(allText)
 
 if __name__ == '__main__':
     app = QApplication()
