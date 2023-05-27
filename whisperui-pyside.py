@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QMenu, QMenuBar, QToolBar, QComboBox, QTextEdit, QVBoxLayout, QWidget, QPushButton, QFileDialog
+from PySide6.QtWidgets import QApplication, QMainWindow, QMenu, QMenuBar, QToolBar, QComboBox, QTextEdit, QVBoxLayout, QWidget, QPushButton, QFileDialog, QCheckBox
 from PySide6.QtGui import QAction, Qt
 import whisper
 import platform
@@ -46,12 +46,15 @@ class TranscriptionFrame(QMainWindow):
 
         base_item.triggered.connect(lambda: self.transcription_model.setCurrentText("base"))
         small_item.triggered.connect(lambda: self.transcription_model.setCurrentText("small"))
+        medium_item = model_menu.addAction("Medium")
         large_item.triggered.connect(lambda: self.transcription_model.setCurrentText("large"))
 
         # Create the toolbar
         self.toolbar = QToolBar(self)
+        self.timestamp_checkbox = QCheckBox("Timestamps", self.toolbar)
+        self.toolbar.addWidget(self.timestamp_checkbox)
         self.transcription_model = QComboBox(self.toolbar)
-        self.transcription_model.addItems(["base", "small", "large"])
+        self.transcription_model.addItems(["base", "small", "medium", "large"])
         self.toolbar.addWidget(self.transcription_model)
         self.open_tool = QAction("Open", self.toolbar)
         self.save_tool = QAction("Save", self.toolbar)
@@ -97,30 +100,38 @@ class TranscriptionFrame(QMainWindow):
         if file_dialog.exec() == QFileDialog.Accepted:
             file_path = file_dialog.selectedFiles()[0]
             if platform.system() == "Windows":
-                file_path = file_path.replace("/", "\\")
-                print(file_path)
+                # transcribe the audio file with timestamps
                 model = pywhisper.load_model(self.transcription_model.currentText())
-                result = model.transcribe(file_path, "json")
-                theText = []
-                for word in result["segments"]:
-                    print(f"{word['text']} ({word['start']}-{word['end']})")
-                    theText.append(str(round(word["start"], 2)) + " - " + word["text"])
-                allText = ""
-                for item in theText: 
-                    allText += item + "\n"
-                self.panel.transcription_text.setPlainText(allText)
+                if self.timestamp_checkbox.isChecked():
+                    result = model.transcribe(file_path, verbose=True)
+                    theText = []
+                    for word in result["segments"]:
+                        print(f"{word['text']} ({word['start']}-{word['end']})")
+                        theText.append(str(round(word["start"], 2)) + " - " + word["text"])
+                    allText = ""
+                    for item in theText: 
+                        allText += item + "\n"
+                    self.panel.transcription_text.setPlainText(allText)
+                else:
+                    result = model.transcribe(file_path)
+                    self.panel.transcription_text.setPlainText(result["text"])
             else:
                 # transcribe the audio file with timestamps
                 model = whisper.load_model(self.transcription_model.currentText())
-                result = model.transcribe(file_path, verbose=True)
-                theText = []
-                for word in result["segments"]:
-                    print(f"{word['text']} ({word['start']}-{word['end']})")
-                    theText.append(str(round(word["start"], 2)) + " - " + word["text"])
-                allText = ""
-                for item in theText: 
-                    allText += item + "\n"
-                self.panel.transcription_text.setPlainText(allText)
+                if self.timestamp_checkbox.isChecked():
+                    result = model.transcribe(file_path, verbose=True)
+                    theText = []
+                    for word in result["segments"]:
+                        print(f"{word['text']} ({word['start']}-{word['end']})")
+                        theText.append(str(round(word["start"], 2)) + " - " + word["text"])
+                    allText = ""
+                    for item in theText: 
+                        allText += item + "\n"
+                    self.panel.transcription_text.setPlainText(allText)
+                else:
+                    result = model.transcribe(file_path)
+                    self.panel.transcription_text.setPlainText(result["text"])
+                
 
 if __name__ == '__main__':
     app = QApplication()
